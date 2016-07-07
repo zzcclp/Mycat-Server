@@ -99,7 +99,7 @@ public class SdnLogPartitioner extends AbstractPartitionAlgorithm implements Rul
             
         Integer[] re = null; //new Integer[len];
         
-        if (len >= partitionMon){
+        if (len >= 12){
             re = new Integer[partitionMon];
             for (int i = 0; i < partitionMon; i++){
                 re[i] = i;
