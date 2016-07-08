@@ -31,12 +31,11 @@ RuleAlgorithm {
     private static final Logger LOGGER = Logger
             .getLogger(PortalLogPartitioner.class);
 
-
-    private Integer intervalMon;
-    private Integer intervalDay;
-    private String dateFormat;
-
+    private Integer partitionMon;
     private Integer partitionDay;
+    private String dateFormat;
+    
+    private Integer intervalDay;
     private Integer totalPartitions;
 
     private static final String DATETIME_FORMAT = "yyyy-MM-dd";
@@ -46,9 +45,9 @@ RuleAlgorithm {
         if (dateFormat == null){
             dateFormat = DATETIME_FORMAT;
         }
-
-        partitionDay = 30 / intervalDay;
-        totalPartitions = intervalMon * partitionDay;
+        
+        intervalDay = 30 / partitionDay;
+        totalPartitions = partitionMon * partitionDay;
     }
 
     /* (non-Javadoc)
@@ -70,7 +69,7 @@ RuleAlgorithm {
             }
             day = day - 1; // start from 0
 
-            int targetPartition = mon % intervalMon * partitionDay + day / intervalDay;
+            int targetPartition = mon % partitionMon * partitionDay + day / intervalDay;
             return targetPartition;
 
         } catch (ParseException e) {
@@ -99,12 +98,13 @@ RuleAlgorithm {
             Integer endMon = cae.get(Calendar.MONTH);
             
             Integer diffMon = (endYear - beginYear) * 12 + endMon;
-            
             if (diffMon < 0){
                 return null;
             }
             
-            if ((diffMon - beginMon) >= intervalMon) { // return all partitions
+            int monLen = diffMon - beginMon + 1;
+            
+            if ((diffMon - beginMon) >= partitionMon) { // return all partitions
                 
             } else {
                 
@@ -124,13 +124,13 @@ RuleAlgorithm {
             throw new java.lang.IllegalArgumentException(e);
         }
     }
-
-    public void setIntervalMon(Integer intervalMon) {
-        this.intervalMon = intervalMon;
+    
+    public void setPartitionMon(Integer partitionMon) {
+        this.partitionMon = partitionMon;
     }
 
-    public void setIntervalDay(Integer intervalDay) {
-        this.intervalDay = intervalDay;
+    public void setPartitionDay(Integer partitionDay) {
+        this.partitionDay = partitionDay;
     }
 
     public void setDateFormat(String dateFormat) {
@@ -155,8 +155,8 @@ RuleAlgorithm {
 
         PortalLogPartitioner plp = new PortalLogPartitioner();
         plp.setDateFormat("yyyy-MM-dd");
-        plp.setIntervalMon(2);
-        plp.setIntervalDay(5);
+        plp.setPartitionMon(2);
+        plp.setPartitionDay(6);
         plp.init();
 
         System.out.println(plp.calculate("2015-01-02"));
@@ -171,12 +171,13 @@ RuleAlgorithm {
         System.out.println(plp.calculate("2015-03-02"));
         System.out.println(plp.calculate("2015-04-12"));
         System.out.println(plp.calculate("2015-05-22"));
-
+        
+        /*
         System.out.println("====================================");
         Integer[] tmps = plp.calculateRange("2014-11-02", "2015-09-02");
         for (Integer i : tmps){
             System.out.println(i);
-        }
+        }*/
     }
 
 }
