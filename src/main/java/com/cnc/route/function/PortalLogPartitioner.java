@@ -90,33 +90,51 @@ RuleAlgorithm {
             Integer beginYear = cab.get(Calendar.YEAR);
             Integer beginMon = cab.get(Calendar.MONTH);
             
-            Date e = new SimpleDateFormat(dateFormat).parse(beginValue);
+            Date e = new SimpleDateFormat(dateFormat).parse(endValue);
             Calendar cae = Calendar.getInstance();
             cae.setTime(e);
             
             Integer endYear = cae.get(Calendar.YEAR);
             Integer endMon = cae.get(Calendar.MONTH);
             
-            Integer diffMon = (endYear - beginYear) * 12 + endMon;
-            if (diffMon < 0){
+            Integer spaceMon = ((endYear - beginYear) * 12 + endMon) - beginMon;
+            
+            if (spaceMon < 0){   // endDate smaller than beginDate
                 return null;
             }
             
-            int monLen = diffMon - beginMon + 1;
-            
-            if ((diffMon - beginMon) >= partitionMon) { // return all partitions
-                
-            } else {
-                
-            }
-
             Integer begin = this.calculate(beginValue);
             Integer end = this.calculate(endValue);
+            
+            Integer beginR = begin;
+            Integer endR = end;
+            
+            while (beginR >= partitionDay) {
+                beginR = beginR - partitionDay;
+            }
+            while (endR >= partitionDay) {
+                endR = endR - partitionDay;
+            }
+            
+            Integer partitionLen = 0;
+            
+            if (spaceMon > 0) {
+                spaceMon -= 1;
+                partitionLen = partitionDay - beginR + spaceMon * partitionDay + endR + 1;
+            } else if (spaceMon == 0) { // at the same month
+                partitionLen = endR - beginR + 1;
+            }
 
-            if (end >= begin) {
-
+            if (partitionLen >= totalPartitions) {
+                re = new Integer[totalPartitions];
+                for (int i = 0; i < totalPartitions; i++){
+                    re[i] = i;
+                }
             } else {
-
+                re = new Integer[partitionLen];
+                for (int i = 0; i < partitionLen; i++){
+                    re[i] = (begin + i) % totalPartitions;
+                }
             }
 
             return re;
@@ -126,10 +144,16 @@ RuleAlgorithm {
     }
     
     public void setPartitionMon(Integer partitionMon) {
+        if ((12 % partitionMon) != 0) {
+            throw new java.lang.IllegalArgumentException("partitionMon must be 12's approximate number");
+        }
         this.partitionMon = partitionMon;
     }
 
     public void setPartitionDay(Integer partitionDay) {
+        if ((30 % partitionDay) != 0) {
+            throw new java.lang.IllegalArgumentException("partitionDay must be 30's approximate number");
+        }
         this.partitionDay = partitionDay;
     }
 
@@ -153,31 +177,114 @@ RuleAlgorithm {
         System.out.println(26 / 5);
         System.out.println(23 / 5);*/
 
-        PortalLogPartitioner plp = new PortalLogPartitioner();
-        plp.setDateFormat("yyyy-MM-dd");
-        plp.setPartitionMon(2);
-        plp.setPartitionDay(6);
-        plp.init();
+        PortalLogPartitioner slp = new PortalLogPartitioner();
+        slp.setDateFormat("yyyy-MM-dd");
+        slp.setPartitionMon(3);
+        slp.setPartitionDay(5);
+        slp.init();
 
-        System.out.println(plp.calculate("2015-01-02"));
-        System.out.println(plp.calculate("2015-01-08"));
-        System.out.println(plp.calculate("2015-01-12"));
-        System.out.println(plp.calculate("2015-01-25"));
-        System.out.println(plp.calculate("2015-01-31"));
-        System.out.println(plp.calculate("2015-02-01"));
-        System.out.println(plp.calculate("2015-02-12"));
-        System.out.println(plp.calculate("2015-02-20"));
-        System.out.println(plp.calculate("2015-02-28"));
-        System.out.println(plp.calculate("2015-03-02"));
-        System.out.println(plp.calculate("2015-04-12"));
-        System.out.println(plp.calculate("2015-05-22"));
+        System.out.println(slp.calculate("2015-01-02"));
+        System.out.println(slp.calculate("2015-01-05"));
+        System.out.println(slp.calculate("2015-01-08"));
+        System.out.println(slp.calculate("2015-01-13"));
+        System.out.println(slp.calculate("2015-01-17"));
+        System.out.println(slp.calculate("2015-01-21"));
+        System.out.println(slp.calculate("2015-01-25"));
+        System.out.println(slp.calculate("2015-01-31"));
+        System.out.println(slp.calculate("2015-02-02"));
+        System.out.println(slp.calculate("2015-02-12"));
+        System.out.println(slp.calculate("2015-02-28"));
         
-        /*
-        System.out.println("====================================");
-        Integer[] tmps = plp.calculateRange("2014-11-02", "2015-09-02");
+        System.out.println(slp.calculate("2015-03-04"));
+        System.out.println(slp.calculate("2015-03-06"));
+        System.out.println(slp.calculate("2015-03-09"));
+        System.out.println(slp.calculate("2015-03-15"));
+        System.out.println(slp.calculate("2015-03-19"));
+        System.out.println(slp.calculate("2015-03-20"));
+        System.out.println(slp.calculate("2015-03-25"));
+        System.out.println(slp.calculate("2015-03-31"));
+        System.out.println(slp.calculate("2015-04-02"));
+        System.out.println(slp.calculate("2015-04-12"));
+        System.out.println(slp.calculate("2015-04-28"));
+        System.out.println(slp.calculate("2015-04-30"));
+
+        System.out.println("=================1===================");
+        Integer[] tmps = slp.calculateRange("2015-02-02", "2015-03-15");
         for (Integer i : tmps){
             System.out.println(i);
-        }*/
+        }
+        
+        System.out.println("==================2==================");
+        tmps = slp.calculateRange("2015-05-12", "2015-07-02");
+        for (Integer i : tmps){
+            System.out.println(i);
+        }
+
+        System.out.println("=================3===================");
+        tmps = slp.calculateRange("2015-05-02", "2015-07-02");
+        for (Integer i : tmps){
+            System.out.println(i);
+        }
+        
+        System.out.println("=================4===================");
+        tmps = slp.calculateRange("2015-08-02", "2015-08-22");
+        for (Integer i : tmps){
+            System.out.println(i);
+        }
+        
+        System.out.println("=================44===================");
+        tmps = slp.calculateRange("2015-07-02", "2015-07-22");
+        for (Integer i : tmps){
+            System.out.println(i);
+        }
+        
+        System.out.println("=================5===================");
+        tmps = slp.calculateRange("2015-08-02", "2015-08-05");
+        for (Integer i : tmps){
+            System.out.println(i);
+        }
+        
+        System.out.println("=================6===================");
+        tmps = slp.calculateRange("2015-12-25", "2016-01-05");
+        for (Integer i : tmps){
+            System.out.println(i);
+        }
+        
+        System.out.println("==================7==================");
+        tmps = slp.calculateRange("2015-12-25", "2016-02-05");
+        for (Integer i : tmps){
+            System.out.println(i);
+        }
+        
+        System.out.println("==================77==================");
+        tmps = slp.calculateRange("2015-11-25", "2016-01-05");
+        for (Integer i : tmps){
+            System.out.println(i);
+        }
+        
+        System.out.println("===================8=================");
+        tmps = slp.calculateRange("2015-12-25", "2016-03-05");
+        for (Integer i : tmps){
+            System.out.println(i);
+        }
+        
+        System.out.println("===================9=================");
+        tmps = slp.calculateRange("2015-12-25", "2016-04-05");
+        for (Integer i : tmps){
+            System.out.println(i);
+        }
+        
+        System.out.println("===================10=================");
+        tmps = slp.calculateRange("2015-12-05", "2016-03-05");
+        for (Integer i : tmps){
+            System.out.println(i);
+        }
+        
+        System.out.println("===================11=================");
+        tmps = slp.calculateRange("2015-12-05", "2016-02-24");
+        for (Integer i : tmps){
+            System.out.println(i);
+        }
     }
 
 }

@@ -98,6 +98,9 @@ public class SdnLogPartitioner extends AbstractPartitionAlgorithm implements Rul
     }
 
     public void setPartitionMon(Integer partitionMon) {
+        if ((12 % partitionMon) != 0) {
+            throw new java.lang.IllegalArgumentException("partitionMon must be 12's approximate number");
+        }
         this.partitionMon = partitionMon;
     }
 
