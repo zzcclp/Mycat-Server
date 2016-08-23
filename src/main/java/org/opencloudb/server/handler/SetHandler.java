@@ -155,7 +155,7 @@ public final class SetHandler {
 			 boolean ignore = SetIgnoreUtil.isIgnoreStmt(stmt);
              if ( !ignore ) {        	 
      			StringBuilder s = new StringBuilder();
-    			logger.warn(s.append(c).append(stmt).append(" is not recoginized and ignored").toString());
+     			logger.debug(s.append(c).append(stmt).append(" is not recoginized and ignored").toString());
              }
 			c.write(c.writeToBuffer(OkPacket.OK, c.allocate()));
 		}
